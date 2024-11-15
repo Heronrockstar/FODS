@@ -1,0 +1,61 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+
+np.random.seed(42)
+data = pd.DataFrame({
+    'age': np.random.randint(20, 80, 500),
+    'gender': np.random.choice(['Male', 'Female'], 500),
+    'blood_pressure': np.random.randint(90, 180, 500),
+    'cholesterol': np.random.randint(150, 300, 500),
+    'treatment_outcome': np.random.choice(['Good', 'Bad'], 500)
+})
+
+data['gender'] = LabelEncoder().fit_transform(data['gender'])
+data['treatment_outcome'] = LabelEncoder().fit_transform(data['treatment_outcome']) 
+
+X = data.drop('treatment_outcome', axis=1)
+y = data['treatment_outcome']
+
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+
+y_pred = knn.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred)
+report = classification_report(y_test, y_pred, target_names=['Bad', 'Good'])
+
+print(f'Accuracy: {accuracy:.2f}')
+print(f'Precision: {precision:.2f}')
+print(f'Recall: {recall:.2f}')
+print(f'F1 Score: {f1:.2f}')
+print('\nClassification Report:\n', report)
+
+new_patient_data = pd.DataFrame({
+    'age': [45, 60],
+    'gender': ['Male', 'Female'],
+    'blood_pressure': [130, 140],
+    'cholesterol': [200, 250]
+})
+
+new_patient_data['gender'] = LabelEncoder().fit_transform(new_patient_data['gender'])
+new_patient_data = scaler.transform(new_patient_data)
+
+new_predictions = knn.predict(new_patient_data)
+
+new_predictions = ['Good' if pred == 1 else 'Bad' for pred in new_predictions]
+
+print('Predictions for new patients:')
+for i, outcome in enumerate(new_predictions):
+    print(f'Patient {i+1}: {outcome}')

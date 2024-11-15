@@ -1,0 +1,53 @@
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+np.random.seed(42)
+data = pd.DataFrame({
+    'fever': np.random.randint(0, 2, 100),
+    'cough': np.random.randint(0, 2, 100),
+    'fatigue': np.random.randint(0, 2, 100),
+    'age': np.random.randint(18, 70, 100),
+    'condition': np.random.randint(0, 2, 100) 
+})
+
+print(data.isnull().sum())
+
+X = data.drop('condition', axis=1)
+y = data['condition']
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+k = 5 
+knn = KNeighborsClassifier(n_neighbors=k)
+knn.fit(X_train, y_train)
+
+new_patient = pd.DataFrame({
+    'fever': [1],
+    'cough': [0],
+    'fatigue': [1],
+    'age': [45]
+})
+
+new_patient_scaled = scaler.transform(new_patient)
+
+predicted_condition = knn.predict(new_patient_scaled)[0]
+print(f'The predicted condition for the new patient is: {"Condition" if predicted_condition == 1 else "No Condition"}')
+
+y_pred = knn.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred)
+
+print(f'Accuracy: {accuracy:.2f}')
+print(f'Precision: {precision:.2f}')
+print(f'Recall: {recall:.2f}')
+print(f'F1 Score: {f1:.2f}')
