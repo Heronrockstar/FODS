@@ -1,0 +1,23 @@
+import pandas as pd
+import scipy.stats as stats
+
+data = {
+    'product_title': ['Pineapple slicer', 'Levis Jeans Pant', 'Wallet', 'Salwar'],
+    'product_category': ['Apparel', 'Apparel', 'Apparel', 'Apparel'],
+    'star_rating': [4, 5, 5, 5],
+    'review_headline': ['Really good', 'Perfect Dress', 'Love it', 'Awesome'],
+    'review_date': ['2013-01-14', '2014-04-22', '2015-07-28', '2015-06-12']
+}
+
+df = pd.DataFrame(data)
+
+apparel_reviews = df[df['product_category'] == 'Apparel']
+
+mean_rating = apparel_reviews['star_rating'].mean()
+
+sem = stats.sem(apparel_reviews['star_rating'])
+
+confidence_interval = stats.t.interval(0.95, len(apparel_reviews['star_rating'])-1, loc=mean_rating, scale=sem)
+
+print(f"Mean Rating: {mean_rating}")
+print(f"95% Confidence Interval: {confidence_interval}")
